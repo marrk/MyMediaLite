@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyMediaLite", "MyMediaLite/MyMediaLite.csproj", "{73424F09-BEEA-4992-B116-5F123496F5D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyMediaLite", "MyMediaLite\MyMediaLite.csproj", "{73424F09-BEEA-4992-B116-5F123496F5D3}"
 EndProject
 Project("{9344bdbb-3e7f-41fc-a0dd-8665d75ee146}") = "Packages", "Packages.mdproj", "{AD1EB4BB-DE14-418B-B704-67D76E468FF0}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ICDM2010", "ICDM2010", "{1C7C686A-EE91-488B-8523-2FF009F1BAB2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MappingItemRecommendation", "Mapping\MappingItemPrediction\MappingItemRecommendation.csproj", "{C475ABE7-84B0-4427-987B-B06E8548676F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSON-API", "JSON-API\JSON-API.csproj", "{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,12 @@ Global
 		{7DCAB3F3-B687-4589-80F6-76F8BECBC6F8}.Default|Any CPU.Build.0 = Debug|Any CPU
 		{7DCAB3F3-B687-4589-80F6-76F8BECBC6F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DCAB3F3-B687-4589-80F6-76F8BECBC6F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{861D978E-CB3C-4BC3-B0F9-A63D2AD5340D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AD1EB4BB-DE14-418B-B704-67D76E468FF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AD1EB4BB-DE14-418B-B704-67D76E468FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C475ABE7-84B0-4427-987B-B06E8548676F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
