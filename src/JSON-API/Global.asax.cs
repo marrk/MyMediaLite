@@ -37,11 +37,7 @@ namespace JSONAPI
 	{
 		public class MMAPIHost : AppHostBase
 		{
-			public MMAPIHost() : base("MyMediaLite API", typeof(MMAPIService).Assembly) {
-				var user_mapping = new MyMediaLite.Data.EntityMapping(); 
-				var item_mapping = new MyMediaLite.Data.EntityMapping();
-				var recommender = new MyMediaLite.RatingPrediction.MatrixFactorization();
-			}
+			public MMAPIHost() : base("MyMediaLite API", typeof(MMAPIService).Assembly) { }
 
 			public override void Configure(Funq.Container Container)
 			{
