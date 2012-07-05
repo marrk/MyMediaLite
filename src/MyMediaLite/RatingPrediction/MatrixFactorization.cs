@@ -330,6 +330,34 @@ namespace MyMediaLite.RatingPrediction
 			return user_vector;
 		}
 
+		/// <summary>
+		/// Gets the item vector.
+		/// </summary>
+		/// <returns>
+		/// The item vector.
+		/// </returns>
+		/// <param name='itemid'>
+		/// Itemid.
+		/// </param>
+		public IList<float> GetItemVector(int itemid)
+		{
+			return item_factors.GetRow (itemid);
+		}
+
+		/// <summary>
+		/// Gets the item vector.
+		/// </summary>
+		/// <returns>
+		/// The item vector.
+		/// </returns>
+		/// <param name='itemid'>
+		/// Itemid.
+		/// </param>
+		public IList<float> GetUserVector(int userid)
+		{
+			return user_factors.GetRow (userid);
+		}
+
 		///
 		public IList<Pair<int, float>> ScoreItems(IList<Pair<int, float>> rated_items, IList<int> candidate_items)
 		{

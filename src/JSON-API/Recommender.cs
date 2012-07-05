@@ -24,6 +24,7 @@ using MyMediaLite.Data;
 using ServiceStack.ServiceClient.Web;
 using ServiceStack.ServiceInterface;
 using ServiceStack.Text;
+using System.Collections.Generic;
 
 namespace JSONAPI
 {
@@ -37,7 +38,7 @@ namespace JSONAPI
 		public void init()
 		{
 			recommender = new MatrixFactorization();
-			var training_data = RatingData.Read("tiny5Mratings.csv");
+			var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
 			recommender.Ratings = training_data;
 			recommender.Train();
 		}
@@ -46,16 +47,36 @@ namespace JSONAPI
 		{
 			var items = recommender.Ratings.AllItems.Count;
 			var users = recommender.Ratings.AllUsers.Count;
-
-			return new StatusResponse { Result = "Items: " + items + " Users: " + users};
+			var ratings = recommender.Ratings.Count;
+			return new StatusResponse { Result = "Items: " + items + " Users: " + users + " Ratings: " + ratings};
 	
 		}
-		public Recommendation[] predict(int userid)
+		public List<Recommendation> predict(int userid)
 		{
-			recommender.ScoreItems(userid, recommender.Ratings.AllItems);
-			Recommendation[] returnrecommendations = new Recommendation[1];
-			Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
+			//recommender.RetrainUser (userid);
+			recommender.Train ();
+			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems);
+			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
+			List<Recommendation> returnrecommendations = new List<Recommendation>();
+			foreach(MyMediaLite.DataType.Pair<int,float> prediction in allpredictions)
+			{
+				Recommendation newrecommendation = new Recommendation();
+				newrecommendation.ID = prediction.First;
+				newrecommendation.prediction = prediction.Second;
+				newrecommendation.vector = recommender.GetItemVector(prediction.First);
+				returnrecommendations.Add(newrecommendation);
+			}
 			return returnrecommendations;
+		}
+
+		public StatusResponse AddRating(int userid, int itemid, float value)
+		{
+			System.Random rnd = new System.Random();
+			userid = rnd.Next(1,2000000);
+			itemid = rnd.Next(1,2000000);
+			value = rnd.Next (0,4);
+			recommender.Ratings.Add (userid, itemid, value);
+			return new StatusResponse { Result = "OK"};
 		}
 	}
 
@@ -66,6 +87,29 @@ namespace JSONAPI
 		public override object OnGet(StatusResponse request)
 		{
 			return recommender.stats ();
+		}
+	}
+	public class PredictionService : RestServiceBase<User>
+	{
+		public Recommender recommender { get; set; }
+
+		public override object OnGet(User request)
+		{
+			int userid = Convert.ToInt32 (request.userid);
+			return recommender.predict (userid);
+		}
+	}
+
+	public class RatingService : RestServiceBase<Rating>
+	{	
+		public Recommender recommender { get; set; }
+
+		public override object OnGet(Rating request)
+		{
+			int userid = Convert.ToInt32(request.userid);
+			int itemid = Convert.ToInt32(request.itemid);
+			float value = Convert.ToSingle(request.value);
+			return recommender.AddRating(userid, itemid, value);
 		}
 	}
 }

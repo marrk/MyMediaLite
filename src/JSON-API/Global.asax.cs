@@ -7,36 +7,37 @@ using MyMediaLite;
 using MyMediaLite.Data;
 using MyMediaLite.RatingPrediction;
 using MyMediaLite.IO;
+using System.Collections.Generic;
 
 namespace JSONAPI
 {
 	[DataContract]
 	[Description("MyMediaLite Web API.")]
-	[RestService("/hello")] //Optional: Define an alternate REST-ful url for this service
-	[RestService("/hello/{User}")]
-	[RestService("/hello/{User*}")] 
+	[RestService("/rating/{itemid}/{itemid}/{value}")] //Optional: Define an alternate REST-ful url for this service
 	public class Rating
 	{
 		[DataMember]
-		public string Value {get;set;}
+		public string value {get;set;}
 		[DataMember]
-		public string Item {get;set;}
+		public string itemid {get;set;}
 		[DataMember]
-		public string User {get;set;}
+		public string userid {get;set;}
+	}
+
+	[RestService("/recommendation/{userid}")] //Optional: Define an alternate REST-ful url for this service
+	public class User
+	{
+		[DataMember]
+		public string userid {get;set;}
 	}
 
 	public class Recommendation
 	{
 		public int ID { get; set; }
 		public double prediction {get;set;}
-		public double[] vector {get;set;}
+		public IList<float> vector {get;set;}
 	}
 	public class StatusResponse
-	{
-		public string Result {get;set;}
-	}
-
-	public class RatingResponse
 	{
 		public string Result {get;set;}
 	}
@@ -53,7 +54,8 @@ namespace JSONAPI
 
 			Routes
 				.Add<Rating>("/rating/{Userid}/{Itemid}/{Value}")
-				.Add<StatusResponse>("/status");
+				.Add<StatusResponse>("/status")
+				.Add<User>("/recommendation/{userid}");
 		}
 	}
 
