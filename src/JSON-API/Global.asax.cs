@@ -36,6 +36,16 @@ namespace JSONAPI
 		public int ID { get; set; }
 		public double prediction {get;set;}
 		public IList<float> vector {get;set;}
+
+		public Recommendation(int ID, double prediction, IList<float> vector){
+			this.ID = ID;
+			this.prediction = prediction;
+			this.vector = vector;
+		}
+
+		public Recommendation ()
+		{
+		}
 	}
 	public class StatusResponse
 	{

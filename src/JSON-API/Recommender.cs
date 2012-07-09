@@ -54,10 +54,12 @@ namespace JSONAPI
 		public List<Recommendation> predict(int userid)
 		{
 			//recommender.RetrainUser (userid);
-			recommender.Train ();
+			//recommender.Train ();
 			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems);
 			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
 			List<Recommendation> returnrecommendations = new List<Recommendation>();
+			returnrecommendations.Add(new Recommendation(-1, -1, recommender.GetUserVector(userid)));
+
 			foreach(MyMediaLite.DataType.Pair<int,float> prediction in allpredictions)
 			{
 				Recommendation newrecommendation = new Recommendation();
@@ -75,7 +77,9 @@ namespace JSONAPI
 			userid = rnd.Next(1,2000000);
 			itemid = rnd.Next(1,2000000);
 			value = rnd.Next (0,4);
-			recommender.Ratings.Add (userid, itemid, value);
+			MyMediaLite.Data.Ratings r = new MyMediaLite.Data.Ratings();
+			r.Add(userid, itemid, value);
+			recommender.AddRatings(r);
 			return new StatusResponse { Result = "OK"};
 		}
 	}
