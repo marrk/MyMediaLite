@@ -25,6 +25,8 @@ using ServiceStack.ServiceClient.Web;
 using ServiceStack.ServiceInterface;
 using ServiceStack.Text;
 using System.Collections.Generic;
+using System.Linq;
+using System.Timers;
 
 namespace JSONAPI
 {
@@ -33,16 +35,36 @@ namespace JSONAPI
 		public static Recommender Instance = new Recommender();
 		private EntityMapping user_mapping;
 		private EntityMapping item_mapping;
-		private MatrixFactorization recommender;
+		private static MatrixFactorization recommender;
+		private static Timer _timer;
+		private static MyMediaLite.Data.StackableRatings r = new MyMediaLite.Data.StackableRatings();
+
+		static void _timer_Elapsed(object sender, ElapsedEventArgs e)
+    	{
+			Console.WriteLine (DateTime.Now + " Adding " + r.Count + " ratings");
+			recommender.AddRatings(r);
+			r.Clear ();
+			Console.WriteLine (DateTime.Now + " Added " + r.Count + " ratings");
+    	}
 
 		public void init()
 		{
 			recommender = new MatrixFactorization();
+			Console.WriteLine(DateTime.Now + " Started Reading Ratings");
+			//recommender.LoadModel ("model.bin");
 			var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
 			recommender.Ratings = training_data;
+			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
+			Console.WriteLine(DateTime.Now + " Started Training");
 			recommender.Train();
-		}
+			//recommender.SaveModel ("model.bin");
+			Console.WriteLine(DateTime.Now + " Finished Training");
+			_timer = new Timer(6000); // Set up the timer for 3 seconds
+			_timer.Elapsed += new ElapsedEventHandler(_timer_Elapsed);
+			_timer.Enabled = true; // Enable it
 
+		}
+		
 		public StatusResponse stats()
 		{
 			var items = recommender.Ratings.AllItems.Count;
@@ -55,7 +77,7 @@ namespace JSONAPI
 		{
 			//recommender.RetrainUser (userid);
 			//recommender.Train ();
-			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems);
+			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems).OrderByDescending(prediction => prediction.Second).Take(20);
 			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
 			List<Recommendation> returnrecommendations = new List<Recommendation>();
 			returnrecommendations.Add(new Recommendation(-1, -1, recommender.GetUserVector(userid)));
@@ -71,15 +93,35 @@ namespace JSONAPI
 			return returnrecommendations;
 		}
 
+		/*
+		public List<Recommendation> predict(int userid, Diversifier diversifier, float level)
+		{
+			//recommender.RetrainUser (userid);
+			//recommender.Train ();
+			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems);
+
+			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
+			List<Recommendation> returnrecommendations = new List<Recommendation>();
+			returnrecommendations.Add(new Recommendation(-1, -1, recommender.GetUserVector(userid)));
+
+			foreach(MyMediaLite.DataType.Pair<int,float> prediction in allpredictions)
+			{
+				Recommendation newrecommendation = new Recommendation();
+				newrecommendation.ID = prediction.First;
+				newrecommendation.prediction = prediction.Second;
+				newrecommendation.vector = recommender.GetItemVector(prediction.First);
+				returnrecommendations.Add(newrecommendation);
+			}
+			return returnrecommendations;
+		}
+		*/
 		public StatusResponse AddRating(int userid, int itemid, float value)
 		{
 			System.Random rnd = new System.Random();
-			userid = rnd.Next(1,2000000);
-			itemid = rnd.Next(1,2000000);
+			userid = rnd.Next(1,200000);
+			itemid = rnd.Next(1,200000);
 			value = rnd.Next (0,4);
-			MyMediaLite.Data.Ratings r = new MyMediaLite.Data.Ratings();
 			r.Add(userid, itemid, value);
-			recommender.AddRatings(r);
 			return new StatusResponse { Result = "OK"};
 		}
 	}
@@ -100,7 +142,13 @@ namespace JSONAPI
 		public override object OnGet(User request)
 		{
 			int userid = Convert.ToInt32 (request.userid);
-			return recommender.predict (userid);
+			if(request.level == ""){
+				return recommender.predict (userid);
+			} else {
+				List<Recommendation> recommendations = recommender.predict (userid);
+				//Diversify (recommendations, request.level);
+				return recommendations;
+			}
 		}
 	}
 

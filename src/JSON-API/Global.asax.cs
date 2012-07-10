@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.Serialization;
 using ServiceStack.ServiceHost;
 using ServiceStack.WebHost.Endpoints;
+using ServiceStack.Common.Web;
 using MyMediaLite;
 using MyMediaLite.Data;
 using MyMediaLite.RatingPrediction;
@@ -13,7 +14,7 @@ namespace JSONAPI
 {
 	[DataContract]
 	[Description("MyMediaLite Web API.")]
-	[RestService("/rating/{itemid}/{itemid}/{value}")] //Optional: Define an alternate REST-ful url for this service
+	[RestService("/rating/{itemid}/{itemid}/{value}")] 
 	public class Rating
 	{
 		[DataMember]
@@ -24,12 +25,26 @@ namespace JSONAPI
 		public string userid {get;set;}
 	}
 
-	[RestService("/recommendation/{userid}")] //Optional: Define an alternate REST-ful url for this service
+	[RestService("/recommendation/{userid}")] 
+	[RestService("/recommendation/{userid}/{level}")] 
 	public class User
 	{
 		[DataMember]
 		public string userid {get;set;}
+		[DataMember]
+		public string level {get;set;}
 	}
+
+    [RestService("/mu-668f8cbc-c9764138-f6fc077c-bc5b36b0")]
+    public class Blitz {}
+
+    public class BlitzService : IService<Blitz>
+    {
+        public object Execute(Blitz request)
+        {
+            return new HttpResult("42", "text");              
+        }
+    }
 
 	public class Recommendation
 	{
@@ -54,18 +69,21 @@ namespace JSONAPI
 
 	public class MMAPIHost : AppHostBase
 	{
+
 		public MMAPIHost() 
 			: base("MyMediaLite API", typeof(RecommenderService).Assembly) { }
 
 		public override void Configure(Funq.Container container)
 		{
+
 			Recommender.Instance.init();
 			container.Register(Recommender.Instance);
 
 			Routes
 				.Add<Rating>("/rating/{Userid}/{Itemid}/{Value}")
 				.Add<StatusResponse>("/status")
-				.Add<User>("/recommendation/{userid}");
+				.Add<User>("/recommendation/{userid}")	
+				.Add<User>("/recommendation/{userid}/{level}");
 		}
 	}
 

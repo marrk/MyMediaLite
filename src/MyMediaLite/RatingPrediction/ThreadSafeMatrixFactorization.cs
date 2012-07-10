@@ -46,7 +46,7 @@ namespace MyMediaLite.RatingPrediction
 	///     This recommender supports incremental updates.
 	///   </para>
 	/// </remarks>
-	public class MatrixFactorization : IncrementalRatingPredictor, IIterativeModel, IFoldInRatingPredictor
+	public class ThreadSafeMatrixFactorization : IncrementalRatingPredictor, IIterativeModel, IFoldInRatingPredictor
 	{
 		/// <summary>Matrix containing the latent user factors</summary>
 		protected Matrix<float> user_factors;
@@ -76,7 +76,7 @@ namespace MyMediaLite.RatingPrediction
 		public uint NumIter { get; set; }
 
 		/// <summary>Default constructor</summary>
-		public MatrixFactorization() : base()
+		public ThreadSafeMatrixFactorization() : base()
 		{
 			// set default values
 			Regularization = 0.015f;

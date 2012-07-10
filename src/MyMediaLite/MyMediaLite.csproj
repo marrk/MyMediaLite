@@ -239,6 +239,9 @@
     <Compile Include="RatingPrediction\SigmoidUserAsymmetricFactorModel.cs" />
     <Compile Include="RatingPrediction\SigmoidCombinedAsymmetricFactorModel.cs" />
     <Compile Include="ItemRecommendation\MostPopularByAttributes.cs" />
+    <Compile Include="Diversification\LatentFeatureDiversfication.cs" />
+    <Compile Include="RatingPrediction\ThreadSafeMatrixFactorization.cs" />
+    <Compile Include="Data\StackableRatings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)/Microsoft.CSharp.targets" />
   <ItemGroup>
