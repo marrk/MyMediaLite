@@ -14,7 +14,7 @@ namespace JSONAPI
 {
 	[DataContract]
 	[Description("MyMediaLite Web API.")]
-	[RestService("/rating/{itemid}/{itemid}/{value}")] 
+	[RestService("/rating/{userid}/{itemid}/{value}")] 
 	public class Rating
 	{
 		[DataMember]

@@ -27,24 +27,33 @@ using ServiceStack.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using System.IO;
 
 namespace JSONAPI
 {
 	public class Recommender
 	{
+		public TextWriter writer = new StreamWriter("addedratings.log");
 		public static Recommender Instance = new Recommender();
-		private EntityMapping user_mapping;
-		private EntityMapping item_mapping;
+		public EntityMapping user_mapping = new EntityMapping();
+		public EntityMapping item_mapping = new EntityMapping();
 		private static MatrixFactorization recommender;
 		private static Timer _timer;
 		private static MyMediaLite.Data.StackableRatings r = new MyMediaLite.Data.StackableRatings();
 
+		private static Object _locker = new Object();
 		static void _timer_Elapsed(object sender, ElapsedEventArgs e)
-    	{
-			Console.WriteLine (DateTime.Now + " Adding " + r.Count + " ratings");
-			recommender.AddRatings(r);
-			r.Clear ();
-			Console.WriteLine (DateTime.Now + " Added " + r.Count + " ratings");
+		{
+			StackableRatings stack;
+			lock (_locker) {
+				stack = r;
+				r = new StackableRatings ();
+			}
+			_timer.Enabled = false;
+			Console.WriteLine (DateTime.Now + " Adding " + stack.Count + " ratings");
+			recommender.AddRatings (stack);
+			Console.WriteLine (DateTime.Now + " Added " + stack.Count + " ratings");
+			_timer.Enabled = true;
     	}
 
 		public void init()
@@ -52,8 +61,9 @@ namespace JSONAPI
 			recommender = new MatrixFactorization();
 			Console.WriteLine(DateTime.Now + " Started Reading Ratings");
 			//recommender.LoadModel ("model.bin");
-			var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
-			recommender.Ratings = training_data;
+			//var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
+			//recommender.Ratings = training_data;
+			recommender.Ratings = new StackableRatings();
 			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
 			Console.WriteLine(DateTime.Now + " Started Training");
 			recommender.Train();
@@ -70,6 +80,21 @@ namespace JSONAPI
 			var items = recommender.Ratings.AllItems.Count;
 			var users = recommender.Ratings.AllUsers.Count;
 			var ratings = recommender.Ratings.Count;
+			var allitems = recommender.Ratings.AllItems;
+			var allusers = recommender.Ratings.AllUsers;
+			TextWriter writer = new StreamWriter ("storedratings.log");
+			foreach (var item in allitems) {
+				foreach (var user in allusers) {
+					float value;
+					if(recommender.Ratings.TryGet (user, item, out value))
+					{
+						writer.WriteLine (user + " " + item + " " + value);
+					}
+				}
+			}
+			writer.Close ();
+			item_mapping.SaveMapping ("itemmapping");
+			user_mapping.SaveMapping ("usermapping");
 			return new StatusResponse { Result = "Items: " + items + " Users: " + users + " Ratings: " + ratings};
 	
 		}
@@ -85,7 +110,7 @@ namespace JSONAPI
 			foreach(MyMediaLite.DataType.Pair<int,float> prediction in allpredictions)
 			{
 				Recommendation newrecommendation = new Recommendation();
-				newrecommendation.ID = prediction.First;
+				newrecommendation.ID = Convert.ToInt32(item_mapping.ToOriginalID(prediction.First));
 				newrecommendation.prediction = prediction.Second;
 				newrecommendation.vector = recommender.GetItemVector(prediction.First);
 				returnrecommendations.Add(newrecommendation);
@@ -115,14 +140,17 @@ namespace JSONAPI
 			return returnrecommendations;
 		}
 		*/
+
+
 		public StatusResponse AddRating(int userid, int itemid, float value)
 		{
-			System.Random rnd = new System.Random();
-			userid = rnd.Next(1,200000);
-			itemid = rnd.Next(1,200000);
-			value = rnd.Next (0,4);
-			r.Add(userid, itemid, value);
+			//System.Random rnd = new System.Random();
+			//userid = rnd.Next(1,200000);
+			//itemid = rnd.Next(1,200000);
+			//value = rnd.Next (0,4);
+			r.AddAsync (userid, itemid, value, _locker);
 			return new StatusResponse { Result = "OK"};
+
 		}
 	}
 
@@ -141,7 +169,7 @@ namespace JSONAPI
 
 		public override object OnGet(User request)
 		{
-			int userid = Convert.ToInt32 (request.userid);
+			int userid = Convert.ToInt32(recommender.user_mapping.ToInternalID(request.userid));
 			if(request.level == ""){
 				return recommender.predict (userid);
 			} else {
@@ -155,11 +183,18 @@ namespace JSONAPI
 	public class RatingService : RestServiceBase<Rating>
 	{	
 		public Recommender recommender { get; set; }
+		private static object _locker2 = new object();
 
 		public override object OnGet(Rating request)
 		{
-			int userid = Convert.ToInt32(request.userid);
-			int itemid = Convert.ToInt32(request.itemid);
+			/*
+			lock (_locker2) {
+				recommender.writer.WriteLine (request.userid + " " + request.itemid + " " + request.value);
+				recommender.writer.Flush ();
+			}
+			*/
+			int userid = recommender.user_mapping.ToInternalID(request.userid);
+			int itemid = recommender.item_mapping.ToInternalID(request.itemid);
 			float value = Convert.ToSingle(request.value);
 			return recommender.AddRating(userid, itemid, value);
 		}

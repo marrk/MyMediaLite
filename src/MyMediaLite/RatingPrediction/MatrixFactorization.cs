@@ -242,13 +242,11 @@ namespace MyMediaLite.RatingPrediction
 		///
 		public override void AddRatings(IRatings ratings)
 		{
-			lock (this) {
 				base.AddRatings (ratings);
 				foreach (int user_id in ratings.AllUsers)
 					RetrainUser (user_id);
 				foreach (int item_id in ratings.AllItems)
 					RetrainItem (item_id);
-			}
 		}
 
 		///

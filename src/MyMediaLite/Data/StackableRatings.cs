@@ -133,7 +133,14 @@ namespace MyMediaLite.Data
 		///
 		public virtual void Add(int user_id, int item_id, byte rating)
 		{
-			Add(user_id, item_id, (float) rating);
+			Add (user_id, item_id, (float)rating);
+		}
+
+		public virtual void AddAsync(int user_id, int item_id, float rating, object _locker)
+		{
+			lock (_locker) {
+				Add (user_id, item_id, (float)rating);
+			}
 		}
 
 		///
@@ -283,13 +290,19 @@ namespace MyMediaLite.Data
 		///
 		public void Add(float item) { throw new NotSupportedException(); }
 
+		/// <summary>
+		/// Clear this instance.
+		/// </summary>
+		public void Clear() { throw new NotSupportedException(); }
+		
 		///
-		public void Clear()
+		public void Clear(object _locker)
 		{ 
-			lock (this) {
+			lock (_locker) {
 				Users.Clear ();
 				Items.Clear ();
 				Values.Clear ();
+				Console.WriteLine (DateTime.Now + " Cleared ratings");
 			}
 		}
 
