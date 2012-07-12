@@ -33,10 +33,11 @@ namespace JSONAPI
 {
 	public class Recommender
 	{
-		public TextWriter writer = new StreamWriter("addedratings.log");
+		//public TextWriter writer = new StreamWriter("addedratings.log");
 		public static Recommender Instance = new Recommender();
 		public EntityMapping user_mapping = new EntityMapping();
 		public EntityMapping item_mapping = new EntityMapping();
+
 		private static MatrixFactorization recommender;
 		private static Timer _timer;
 		private static MyMediaLite.Data.StackableRatings r = new MyMediaLite.Data.StackableRatings();
@@ -58,12 +59,15 @@ namespace JSONAPI
 
 		public void init()
 		{
-			recommender = new MatrixFactorization();
-			Console.WriteLine(DateTime.Now + " Started Reading Ratings");
+			recommender = new MatrixFactorization ();
+			Console.WriteLine (DateTime.Now + " Started Reading Ratings");
 			//recommender.LoadModel ("model.bin");
-			//var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
-			//recommender.Ratings = training_data;
-			recommender.Ratings = new StackableRatings();
+			using (TextReader moviereader = new StreamReader("movies.dat")) {
+				string line = moviereader.ReadLine ();
+				user_mapping.ToInternalID (line);
+			}
+			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
+			recommender.Ratings = training_data;
 			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
 			Console.WriteLine(DateTime.Now + " Started Training");
 			recommender.Train();
@@ -80,8 +84,9 @@ namespace JSONAPI
 			var items = recommender.Ratings.AllItems.Count;
 			var users = recommender.Ratings.AllUsers.Count;
 			var ratings = recommender.Ratings.Count;
-			var allitems = recommender.Ratings.AllItems;
-			var allusers = recommender.Ratings.AllUsers;
+			//var allitems = recommender.Ratings.AllItems;
+			//var allusers = recommender.Ratings.AllUsers;
+			/*
 			TextWriter writer = new StreamWriter ("storedratings.log");
 			foreach (var item in allitems) {
 				foreach (var user in allusers) {
@@ -95,6 +100,7 @@ namespace JSONAPI
 			writer.Close ();
 			item_mapping.SaveMapping ("itemmapping");
 			user_mapping.SaveMapping ("usermapping");
+			*/
 			return new StatusResponse { Result = "Items: " + items + " Users: " + users + " Ratings: " + ratings};
 	
 		}
@@ -118,6 +124,21 @@ namespace JSONAPI
 			return returnrecommendations;
 		}
 
+		public IList<int> training(int userid)
+		{
+			System.Random rand = new System.Random();
+
+			if (recommender.Ratings.Users.Contains (userid)) {
+				var returnratings = 
+						from r in recommender.Ratings.AllItems
+						where !(from i in recommender.Ratings.GetItems (recommender.Ratings.ByUser [userid]) select i).Contains (r)
+						orderby rand.Next()
+						select r;
+				return returnratings.Take (10).ToList ();
+			} else {
+				return new List<int> ();
+			}
+		}
 		/*
 		public List<Recommendation> predict(int userid, Diversifier diversifier, float level)
 		{
@@ -173,9 +194,15 @@ namespace JSONAPI
 			if(request.level == ""){
 				return recommender.predict (userid);
 			} else {
-				List<Recommendation> recommendations = recommender.predict (userid);
-				//Diversify (recommendations, request.level);
-				return recommendations;
+				if(request.level == "training"){
+					var trainingitems = recommender.training(userid);
+					return trainingitems;
+				}
+				else{
+					List<Recommendation> recommendations = recommender.predict (userid);
+					//Diversify (recommendations, request.level);
+					return recommendations;
+				}
 			}
 		}
 	}

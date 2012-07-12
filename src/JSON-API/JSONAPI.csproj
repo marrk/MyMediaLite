@@ -46,31 +46,31 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="ServiceStack.Common">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.Common.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.Common.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.FluentValidation.Mvc3">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.FluentValidation.Mvc3.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.FluentValidation.Mvc3.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Interfaces">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.Interfaces.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.OrmLite">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.OrmLite.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.OrmLite.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.OrmLite.SqlServer">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.OrmLite.SqlServer.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.OrmLite.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Redis">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.Redis.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.Redis.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.ServiceInterface">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.ServiceInterface.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.ServiceInterface.dll</HintPath>
     </Reference>
     <Reference Include="ServiceStack.Text">
-      <HintPath>..\Libs\ServiceStack\ServiceStack.Text.dll</HintPath>
+      <HintPath>..\Lib\ServiceStack.Text.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -88,7 +88,7 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties VerifyCodeBehindFields="true" VerifyCodeBehindEvents="true">
-        <XspParameters Port="8080" Address="131.155.212.177" SslMode="None" SslProtocol="Default" KeyType="None" CertFile="" KeyFile="" PasswordOptions="None" Password="" Verbose="true" />
+        <XspParameters Port="8080" Address="131.155.121.58" SslMode="None" SslProtocol="Default" KeyType="None" CertFile="" KeyFile="" PasswordOptions="None" Password="" Verbose="true" />
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
@@ -100,6 +100,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="tiny5Mratings.tsv" />
-    <None Include="web.config.old" />
   </ItemGroup>
 </Project>

@@ -25,8 +25,6 @@ namespace JSONAPI
 		public string userid {get;set;}
 	}
 
-	[RestService("/recommendation/{userid}")] 
-	[RestService("/recommendation/{userid}/{level}")] 
 	public class User
 	{
 		[DataMember]
@@ -75,7 +73,6 @@ namespace JSONAPI
 
 		public override void Configure(Funq.Container container)
 		{
-
 			Recommender.Instance.init();
 			container.Register(Recommender.Instance);
 
@@ -83,7 +80,9 @@ namespace JSONAPI
 				.Add<Rating>("/rating/{Userid}/{Itemid}/{Value}")
 				.Add<StatusResponse>("/status")
 				.Add<User>("/recommendation/{userid}")	
-				.Add<User>("/recommendation/{userid}/{level}");
+				.Add<User>("/recommendation/{userid}/{level}")
+				.Add<User>("/training/{userid}")
+				.Add<User>("/training/{userid}/{level}");
 		}
 	}
 
