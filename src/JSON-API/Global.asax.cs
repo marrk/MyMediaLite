@@ -44,6 +44,21 @@ namespace JSONAPI
         }
     }
 
+	public class Actor
+	{
+		public string name;
+		public string role;
+	}
+
+	public class Movie
+	{
+		public string title;
+		public string description;
+		public string director;
+		public string[] actors;
+		public string[] roles;
+	}
+
 	public class Recommendation
 	{
 		public int ID { get; set; }
