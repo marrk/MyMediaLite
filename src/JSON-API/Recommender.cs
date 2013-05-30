@@ -62,18 +62,21 @@ namespace JSONAPI
 			recommender = new MatrixFactorization ();
 			Console.WriteLine (DateTime.Now + " Started Reading Ratings");
 			//recommender.LoadModel ("model.bin");
+			/*
 			using (TextReader moviereader = new StreamReader("movies.dat")) {
 				string line = moviereader.ReadLine ();
 				user_mapping.ToInternalID (line);
 			}
-			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
+			*/
+//			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
+			var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
 			recommender.Ratings = training_data;
 			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
 			Console.WriteLine(DateTime.Now + " Started Training");
 			recommender.Train();
 			//recommender.SaveModel ("model.bin");
 			Console.WriteLine(DateTime.Now + " Finished Training");
-			_timer = new Timer(6000); // Set up the timer for 3 seconds
+			_timer = new Timer(1000); // Set up the timer for 3 seconds
 			_timer.Elapsed += new ElapsedEventHandler(_timer_Elapsed);
 			_timer.Enabled = true; // Enable it
 

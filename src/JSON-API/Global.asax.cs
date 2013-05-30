@@ -92,10 +92,12 @@ namespace JSONAPI
 			container.Register(Recommender.Instance);
 
 			Routes
+				.Add<Rating>("/rating")
 				.Add<Rating>("/rating/{Userid}/{Itemid}/{Value}")
 				.Add<StatusResponse>("/status")
+				.Add<User>("/recommendation")
 				.Add<User>("/recommendation/{userid}")	
-				.Add<User>("/recommendation/{userid}/{level}")
+				.Add<User>("/recommendation/{userid}/{length}/{level}")
 				.Add<User>("/training/{userid}")
 				.Add<User>("/training/{userid}/{level}");
 		}
