@@ -18,19 +18,28 @@ namespace JSONAPI
 	public class Rating
 	{
 		[DataMember]
-		public string value {get;set;}
+		public float value {get;set;}
 		[DataMember]
 		public string itemid {get;set;}
 		[DataMember]
 		public string userid {get;set;}
 	}
-
-	public class User
+	/*
+	public class Prediction
+	{
+		public int itemid {get;set;}
+		public float value {get;set;}
+		public float[] vector {get;set;}
+	}
+	*/
+	public class RecommendationList
 	{
 		[DataMember]
 		public string userid {get;set;}
 		[DataMember]
 		public string level {get;set;}
+		[DataMember]
+		public string length {get;set;}
 	}
 
     [RestService("/mu-668f8cbc-c9764138-f6fc077c-bc5b36b0")]
@@ -44,38 +53,28 @@ namespace JSONAPI
         }
     }
 
-	public class Actor
+	public class Prediction
 	{
-		public string name;
-		public string role;
-	}
-
-	public class Movie
-	{
-		public string title;
-		public string description;
-		public string director;
-		public string[] actors;
-		public string[] roles;
-	}
-
-	public class Recommendation
-	{
-		public int ID { get; set; }
-		public double prediction {get;set;}
+		public string itemid { get; set; }
+		public double value {get;set;}
 		public IList<float> vector {get;set;}
 
-		public Recommendation(int ID, double prediction, IList<float> vector){
-			this.ID = ID;
-			this.prediction = prediction;
+		public Prediction(string itemid, double value, IList<float> vector){
+			this.itemid = itemid;
+			this.value = value;
 			this.vector = vector;
 		}
 
-		public Recommendation ()
-		{
+		public Prediction(){
 		}
 	}
+
 	public class StatusResponse
+	{
+		public string Result {get;set;}
+	}
+
+	public class Status
 	{
 		public string Result {get;set;}
 	}
@@ -88,18 +87,26 @@ namespace JSONAPI
 
 		public override void Configure(Funq.Container container)
 		{
+			base.SetConfig(new EndpointHostConfig
+			               {
+				GlobalResponseHeaders = {
+					{ "Access-Control-Allow-Origin", "*" },
+					{ "Access-Control-Allow-Methods", "GET" },
+					{ "Access-Control-Allow-Headers", "Content-Type" },
+				},
+			});
+
 			Recommender.Instance.init();
 			container.Register(Recommender.Instance);
 
 			Routes
-				.Add<Rating>("/rating")
 				.Add<Rating>("/rating/{Userid}/{Itemid}/{Value}")
-				.Add<StatusResponse>("/status")
-				.Add<User>("/recommendation")
-				.Add<User>("/recommendation/{userid}")	
-				.Add<User>("/recommendation/{userid}/{length}/{level}")
-				.Add<User>("/training/{userid}")
-				.Add<User>("/training/{userid}/{level}");
+				.Add<Status>("/status")
+				.Add<RecommendationList>("/recommendation")
+				.Add<RecommendationList>("/recommendation/{userid}")	
+				.Add<RecommendationList>("/recommendation/{userid}/{length}/{level}")
+				.Add<RecommendationList>("/training/{userid}")
+				.Add<RecommendationList>("/training/{userid}/{level}");
 		}
 	}
 

@@ -350,7 +350,7 @@ namespace MyMediaLite.RatingPrediction
 		/// <returns>
 		/// The item vector.
 		/// </returns>
-		/// <param name='itemid'>
+		/// <param name='userid'>
 		/// Itemid.
 		/// </param>
 		public IList<float> GetUserVector(int userid)

@@ -20,7 +20,7 @@ using System;
 namespace MyMediaLite
 {
 	// Doxygen main page
-	/// \mainpage MyMediaLite API Documentation
+	/// mainpage MyMediaLite API Documentation
 	/// You can browse the documentation by class name, class hierarchy, and member name.
 	/// Just click on the "Classes" tab.
 	///

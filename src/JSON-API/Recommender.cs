@@ -69,7 +69,7 @@ namespace JSONAPI
 			}
 			*/
 //			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
-			var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
+			var training_data = RatingData.Read("emptyratings.tsv", user_mapping, item_mapping);
 			recommender.Ratings = training_data;
 			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
 			Console.WriteLine(DateTime.Now + " Started Training");
@@ -105,26 +105,25 @@ namespace JSONAPI
 			user_mapping.SaveMapping ("usermapping");
 			*/
 			return new StatusResponse { Result = "Items: " + items + " Users: " + users + " Ratings: " + ratings};
-	
 		}
-		public List<Recommendation> predict(int userid)
+		public List<Prediction> predict(int userid)
 		{
 			//recommender.RetrainUser (userid);
 			//recommender.Train ();
 			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems).OrderByDescending(prediction => prediction.Second).Take(20);
 			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
-			List<Recommendation> returnrecommendations = new List<Recommendation>();
-			returnrecommendations.Add(new Recommendation(-1, -1, recommender.GetUserVector(userid)));
+			List<Prediction> returnpredictions = new List<Prediction>();
+			returnpredictions.Add(new Prediction("-1", -1, recommender.GetUserVector(userid)));
 
 			foreach(MyMediaLite.DataType.Pair<int,float> prediction in allpredictions)
 			{
-				Recommendation newrecommendation = new Recommendation();
-				newrecommendation.ID = Convert.ToInt32(item_mapping.ToOriginalID(prediction.First));
-				newrecommendation.prediction = prediction.Second;
-				newrecommendation.vector = recommender.GetItemVector(prediction.First);
-				returnrecommendations.Add(newrecommendation);
+				Prediction newprediction = new Prediction();
+				newprediction.itemid = item_mapping.ToOriginalID(prediction.First);
+				newprediction.value = prediction.Second;
+				newprediction.vector = recommender.GetItemVector(prediction.First);
+				returnpredictions.Add(newprediction);
 			}
-			return returnrecommendations;
+			return returnpredictions;
 		}
 
 		public IList<int> training(int userid)
@@ -164,8 +163,6 @@ namespace JSONAPI
 			return returnrecommendations;
 		}
 		*/
-
-
 		public StatusResponse AddRating(int userid, int itemid, float value)
 		{
 			//System.Random rnd = new System.Random();
@@ -178,20 +175,20 @@ namespace JSONAPI
 		}
 	}
 
-	public class RecommenderService : RestServiceBase<StatusResponse>
+	public class RecommenderService : RestServiceBase<Status>
 	{
 		public Recommender recommender { get; set; }
 
-		public override object OnGet(StatusResponse request)
+		public override object OnGet(Status request)
 		{
 			return recommender.stats ();
 		}
 	}
-	public class PredictionService : RestServiceBase<User>
+	public class PredictionService : RestServiceBase<RecommendationList>
 	{
 		public Recommender recommender { get; set; }
 
-		public override object OnGet(User request)
+		public override object OnGet(RecommendationList request)
 		{
 			int userid = Convert.ToInt32(recommender.user_mapping.ToInternalID(request.userid));
 			if(request.level == ""){
@@ -202,7 +199,7 @@ namespace JSONAPI
 					return trainingitems;
 				}
 				else{
-					List<Recommendation> recommendations = recommender.predict (userid);
+					List<Prediction> recommendations = recommender.predict (userid);
 					//Diversify (recommendations, request.level);
 					return recommendations;
 				}
