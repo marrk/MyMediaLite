@@ -242,6 +242,7 @@
     <Compile Include="Diversification\LatentFeatureDiversfication.cs" />
     <Compile Include="RatingPrediction\ThreadSafeMatrixFactorization.cs" />
     <Compile Include="Data\StackableRatings.cs" />
+    <Compile Include="Correlation\EuclideanMatrix.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)/Microsoft.CSharp.targets" />
   <ItemGroup>

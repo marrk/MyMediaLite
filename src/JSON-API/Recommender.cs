@@ -21,9 +21,11 @@ using MyMediaLite;
 using MyMediaLite.IO;
 using MyMediaLite.RatingPrediction;
 using MyMediaLite.Data;
+using MyMediaLite.Diversification;
 using ServiceStack.ServiceClient.Web;
 using ServiceStack.ServiceInterface;
 using ServiceStack.Text;
+using MyMediaLite.Correlation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
@@ -37,7 +39,7 @@ namespace JSONAPI
 		public static Recommender Instance = new Recommender();
 		public EntityMapping user_mapping = new EntityMapping();
 		public EntityMapping item_mapping = new EntityMapping();
-
+		public LatentFeatureDiversfication diversifier;
 		private static MatrixFactorization recommender;
 		private static Timer _timer;
 		private static MyMediaLite.Data.StackableRatings r = new MyMediaLite.Data.StackableRatings();
@@ -61,21 +63,38 @@ namespace JSONAPI
 		{
 			recommender = new MatrixFactorization ();
 			Console.WriteLine (DateTime.Now + " Started Reading Ratings");
-			//recommender.LoadModel ("model.bin");
 			/*
 			using (TextReader moviereader = new StreamReader("movies.dat")) {
 				string line = moviereader.ReadLine ();
 				user_mapping.ToInternalID (line);
 			}
 			*/
-//			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
-			var training_data = RatingData.Read("emptyratings.tsv", user_mapping, item_mapping);
+
+			var training_data = RatingData.Read("new5Mratings.tsv", user_mapping, item_mapping);
+			//var training_data = RatingData.Read("tiny5Mratings.tsv", user_mapping, item_mapping);
 			recommender.Ratings = training_data;
 			Console.WriteLine(DateTime.Now + " Finished Reading Ratings");
 			Console.WriteLine(DateTime.Now + " Started Training");
-			recommender.Train();
-			//recommender.SaveModel ("model.bin");
+
+//	EITHER TRAIN
+//			recommender.Train(); 
+//			recommender.SaveModel ("model.bin");
+// 	OR LOAD
+			recommender.LoadModel ("model.bin");
 			Console.WriteLine(DateTime.Now + " Finished Training");
+			//Console.WriteLine (DateTime.Now + " Starting calculating distances");
+			//List<Tuple<int, IList<float>>> allvectors = recommender.Ratings.AllItems.Select (x => Tuple.Create (x, recommender.GetItemVector(x))).ToList();
+			//EuclideanMatrix matrix = EuclideanMatrix.CalculateEuclideanMatrix (allvectors);
+			//StreamWriter handle = new StreamWriter("matrix.text");
+			//matrix.Write (handle);
+			//handle.Close ();
+
+			StreamReader handle = new StreamReader ("matrix.text");
+			EuclideanMatrix matrix = EuclideanMatrix.ReadCorrelationMatrix (handle);
+			handle.Close ();
+			diversifier = new LatentFeatureDiversfication(matrix);
+
+			Console.WriteLine (DateTime.Now + " Finished calculating distances");
 			_timer = new Timer(1000); // Set up the timer for 3 seconds
 			_timer.Elapsed += new ElapsedEventHandler(_timer_Elapsed);
 			_timer.Enabled = true; // Enable it
@@ -106,11 +125,11 @@ namespace JSONAPI
 			*/
 			return new StatusResponse { Result = "Items: " + items + " Users: " + users + " Ratings: " + ratings};
 		}
-		public List<Prediction> predict(int userid)
+		public List<Prediction> predict(int userid, int length)
 		{
 			//recommender.RetrainUser (userid);
 			//recommender.Train ();
-			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems).OrderByDescending(prediction => prediction.Second).Take(20);
+			var allpredictions = recommender.ScoreItems(userid, recommender.Ratings.AllItems).OrderByDescending(prediction => prediction.Second);
 			//Recommendation recommendation = new Recommendation{ID = 2, prediction = 3.5, vector = new double[] {0.4, 0.5}};
 			List<Prediction> returnpredictions = new List<Prediction>();
 			returnpredictions.Add(new Prediction("-1", -1, recommender.GetUserVector(userid)));
@@ -123,7 +142,7 @@ namespace JSONAPI
 				newprediction.vector = recommender.GetItemVector(prediction.First);
 				returnpredictions.Add(newprediction);
 			}
-			return returnpredictions;
+			return returnpredictions.Take (length).ToList ();
 		}
 
 		public IList<int> training(int userid)
@@ -191,17 +210,38 @@ namespace JSONAPI
 		public override object OnGet(RecommendationList request)
 		{
 			int userid = Convert.ToInt32(recommender.user_mapping.ToInternalID(request.userid));
+			float level; 
+			int length;
+			if (request.length == "") {
+				length = 20;
+			} else{
+				length = Int16.Parse (request.length);
+			}
 			if(request.level == ""){
-				return recommender.predict (userid);
+				return recommender.predict (userid, length);
 			} else {
 				if(request.level == "training"){
 					var trainingitems = recommender.training(userid);
 					return trainingitems;
 				}
 				else{
-					List<Prediction> recommendations = recommender.predict (userid);
-					//Diversify (recommendations, request.level);
-					return recommendations;
+					level = float.Parse(request.level);
+					List<Prediction> recommendations = recommender.predict (userid,200);
+
+					List<int> recommendation_ids = new List<int>();
+					foreach(Prediction prediction in recommendations){
+						recommendation_ids.Add (recommender.item_mapping.ToInternalID(prediction.itemid));
+					}
+					Console.WriteLine ("Diversifying " + recommendation_ids.Count + " Items @ " + level);
+					IList<int> recommended_ids = recommender.diversifier.DiversifySequential(recommendation_ids, float.Parse(request.level));
+					recommended_ids = recommended_ids.Take (length).ToList ();
+					Console.WriteLine ("Diversified " + recommended_ids.Count + " Items");
+					List<String> movie_ids = new List<String> ();
+					foreach (int movie_id in recommended_ids) {
+						movie_ids.Add (recommender.item_mapping.ToOriginalID(movie_id));
+					}
+					Console.WriteLine ("returning " + movie_ids.Count + " movies");
+					return recommendations.Where (x => movie_ids.Contains (x.itemid));
 				}
 			}
 		}

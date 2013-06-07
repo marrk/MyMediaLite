@@ -87,8 +87,8 @@
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
   <ProjectExtensions>
     <MonoDevelop>
-      <Properties VerifyCodeBehindFields="true" VerifyCodeBehindEvents="true">
-        <XspParameters Port="8080" Address="131.155.121.58" SslMode="None" SslProtocol="Default" KeyType="None" CertFile="" KeyFile="" PasswordOptions="None" Password="" Verbose="true" />
+      <Properties VerifyCodeBehindFields="True" VerifyCodeBehindEvents="True">
+        <XspParameters Port="8080" Address="131.155.121.58" SslMode="None" SslProtocol="Default" KeyType="None" CertFile="" KeyFile="" PasswordOptions="None" Password="" Verbose="True" />
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
@@ -100,5 +100,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="tiny5Mratings.tsv" />
+    <None Include="Lib\ServiceStack.Common.dll" />
+    <None Include="Lib\ServiceStack.Common.pdb" />
+    <None Include="Lib\ServiceStack.Common.xml" />
+    <None Include="Lib\ServiceStack.dll" />
+    <None Include="Lib\ServiceStack.FluentValidation.Mvc3.dll" />
+    <None Include="Lib\ServiceStack.FluentValidation.Mvc3.pdb" />
+    <None Include="Lib\ServiceStack.Interfaces.dll" />
+    <None Include="Lib\ServiceStack.Interfaces.pdb" />
+    <None Include="Lib\ServiceStack.Interfaces.xml" />
+    <None Include="Lib\ServiceStack.OrmLite.dll" />
+    <None Include="Lib\ServiceStack.OrmLite.pdb" />
+    <None Include="Lib\ServiceStack.OrmLite.SqlServer.dll" />
+    <None Include="Lib\ServiceStack.OrmLite.SqlServer.pdb" />
+    <None Include="Lib\ServiceStack.pdb" />
+    <None Include="Lib\ServiceStack.Redis.dll" />
+    <None Include="Lib\ServiceStack.Redis.pdb" />
+    <None Include="Lib\ServiceStack.Redis.XML" />
+    <None Include="Lib\ServiceStack.ServiceInterface.dll" />
+    <None Include="Lib\ServiceStack.ServiceInterface.pdb" />
+    <None Include="Lib\ServiceStack.Text.dll" />
+    <None Include="Lib\ServiceStack.Text.pdb" />
+    <None Include="Lib\ServiceStack.Text.XML" />
+    <None Include="Lib\ServiceStack.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lib\" />
   </ItemGroup>
 </Project>
