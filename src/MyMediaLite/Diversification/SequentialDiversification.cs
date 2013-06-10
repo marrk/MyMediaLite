@@ -89,6 +89,7 @@ namespace MyMediaLite.Diversification
 
 				int next_item_id = items_by_merged_rank[0].First;
 				diversified_item_list.Add(next_item_id);
+				Console.WriteLine ("added " + next_item_id);
 				item_set.Remove(next_item_id);
 			}
 			return diversified_item_list;

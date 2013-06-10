@@ -143,12 +143,12 @@ namespace MyMediaLite.DataType
 		public virtual T this [int i, int j]
 		{
 			get {
-#if DEBUG
+
 				if (i >= this.dim1)
 					throw new ArgumentOutOfRangeException("i too big: " + i + ", dim1 is " + this.dim1);
 				if (j >= this.dim2)
 					throw new ArgumentOutOfRangeException("j too big: " + j + ", dim2 is " + this.dim2);
-#endif
+
 				return data[i * dim2 + j];
 			}
 			set {

@@ -233,10 +233,10 @@ namespace JSONAPI
 						recommendation_ids.Add (recommender.item_mapping.ToInternalID(prediction.itemid));
 					}
 					Console.WriteLine ("Diversifying " + recommendation_ids.Count + " Items @ " + level);
-					IList<int> recommended_ids = recommender.diversifier.DiversifySequential(recommendation_ids, float.Parse(request.level));
-					recommended_ids = recommended_ids.Take (length).ToList ();
-					Console.WriteLine ("Diversified " + recommended_ids.Count + " Items");
-					List<String> movie_ids = new List<String> ();
+					for (int i = 0; i < 30; i++)
+						Console.Write (recommendation_ids[i]);
+					List<int> recommended_ids = recommender.diversifier.DiversifySequential(recommendation_ids, double.Parse(request.level), length);
+					List<string> movie_ids = new List<string> ();
 					foreach (int movie_id in recommended_ids) {
 						movie_ids.Add (recommender.item_mapping.ToOriginalID(movie_id));
 					}

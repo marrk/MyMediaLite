@@ -30,7 +30,7 @@ using MyMediaLite.Taxonomy;
 namespace MyMediaLite.Correlation
 {
 	/// <summary>Class for computing and storing correlations and similarities</summary>
-	public class EuclideanMatrix : SymmetricMatrix<float>
+	public class EuclideanMatrix : SymmetricMatrix<double>
 	{
 		/// <summary>Number of entities, e.g. users or items</summary>
 		protected int num_entities;
@@ -82,7 +82,7 @@ namespace MyMediaLite.Correlation
 
 			// diagonal values
 			for (int i = 0; i < num_entities; i++)
-				cm[i, i] = 1;
+				cm[i, i] = 0;
 
 			string line;
 			while ((line = reader.ReadLine()) != null)
@@ -90,7 +90,7 @@ namespace MyMediaLite.Correlation
 				string[] numbers = line.Split(Constants.SPLIT_CHARS);
 				int i = int.Parse(numbers[0]);
 				int j = int.Parse(numbers[1]);
-				float c = float.Parse(numbers[2], CultureInfo.InvariantCulture);
+				double c = double.Parse(numbers[2], CultureInfo.InvariantCulture);
 
 				if (i >= num_entities)
 					throw new IOException("Row index is too big: i = " + i);
@@ -109,7 +109,7 @@ namespace MyMediaLite.Correlation
 			for (int i = 0; i < num_entities; i++)
 				for (int j = i + 1; j < num_entities; j++)
 			{
-				float val = this[i, j];
+				double val = this[i, j];
 				if (val != 0f)
 					writer.WriteLine(i + " " + j + " " + val.ToString(CultureInfo.InvariantCulture));
 			}
@@ -139,11 +139,11 @@ namespace MyMediaLite.Correlation
 			{
 				Console.WriteLine("Adding dists for " + vector.Item1);
 				allvectors.ForEach(delegate(Tuple<int, IList<float>> obj) {
-					float c = 0;
+					double c = 0;
 					for(int i = 0; i < obj.Item2.Count; i++){
-						c = c + (float) Math.Pow(obj.Item2[i] - vector.Item2[i], 2);
+						c = c + (double) Math.Pow(obj.Item2[i] - vector.Item2[i], 2);
 					}
-					cm[vector.Item1,obj.Item1] = (float) Math.Sqrt(c);
+					cm[vector.Item1,obj.Item1] = Math.Sqrt(c);
 				});
 			});
 
